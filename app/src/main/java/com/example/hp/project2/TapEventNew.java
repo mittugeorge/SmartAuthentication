@@ -242,43 +242,6 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
             },100);
         }
 
-        gpstrack gps = new gpstrack(TapEventNew.this);
-
-        if(gps.canGetLocation()){
-
-
-            double longitude = gps.getLongitude();
-            double latitude = gps.getLatitude();
-
-
-                     /*------- To get city name from coordinates -------- */
-            String cityName = null;
-            String address="";
-            Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
-            List<Address> addresses;
-            try {
-
-                addresses = gcd.getFromLocation(latitude, longitude, 1);
-                if (addresses.size() > 0) {
-                    System.out.println(addresses.get(0).getLocality());
-                    address=addresses.get(0).getAddressLine(0);
-                    Toast.makeText(TapEventNew.this,address,Toast.LENGTH_SHORT).show();
-                    cityName = addresses.get(0).getLocality();
-                }
-            }
-
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Toast.makeText(getApplicationContext(),"Longitude:"+Double.toString(longitude)+"\nLatitude:"+Double.toString(latitude)+"\nCity:"+cityName,Toast.LENGTH_SHORT).show();
-        }
-        else
-        {
-
-            gps.showSettingsAlert();
-        }
-
         return true;
     }
 

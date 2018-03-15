@@ -142,7 +142,6 @@ public class GpsBasics extends AppCompatActivity implements View.OnClickListener
         }
         else
         {
-
             gps.showSettingsAlert();
         }
     }
