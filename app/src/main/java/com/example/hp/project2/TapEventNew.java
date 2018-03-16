@@ -32,26 +32,28 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
     private SensorManager mSensorManager;
     private Sensor acc, gyr, mag;
     private boolean started = false,secondStart = false;
-    private double x, y, z, M, maxX, maxY, maxZ;
-    private long t_start, t_end, avg100msBefore, avg100msAfter, diff;;
-    long currentTime, t_after_center, t_max_tapX, t_max_tapY, t_max_tapZ;
+    private double x, y, z, M, maxX, maxY, maxZ, maxM;
+    private long t_start, t_endX, t_endY, t_endZ, t_endM,
+            avg100msBefore, avg100msAfter, diff;
+    long currentTime, t_after_center, t_max_tapX, t_max_tapY, t_max_tapZ, t_max_tapM;
     private long t = 1;
-    private double meanX, meanY, meanZ;
-    //private ArrayList accData;
-    ArrayList<String> accData;
+    private double meanX, meanY, meanZ, meanM;
     ArrayList<SensorData> outData;
     ArrayList<SensorData> tapData;
     ArrayList<SensorData> hundredMilliDataAhead;
     List<SensorData> hundredMilliDataBehind;
-    ArrayList<String> gyrData;
-    ArrayList<String> magData;
     ArrayList<String> timeStamp;
     ArrayList<Long> ourTimeStamp;
+    ArrayList<SensorData> DataAhead1;
     ArrayList<SensorData> limitSensorData;
     ArrayList<ArrayList<SensorData>> all_clicked_sensorData;
     Button bt_one, bt_two, bt_three, bt_four, bt_five, bt_six, bt_seven, bt_eight, bt_nine, bt_zero, bt_submit;
     TextView tv_enter;//, tv_captcha;
     private long TappedCurrentTimeStamp_test;
+    ArrayList<SensorData> tapDataX1;
+    ArrayList<SensorData> tapDataY1;
+    ArrayList<SensorData> tapDataZ1;
+    ArrayList<SensorData> tapDataM1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -77,18 +79,18 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
         bt_one.setOnTouchListener(this);
         bt_submit.setOnClickListener(this);
         timeStamp = new ArrayList<>();
-        accData = new ArrayList<>();
-        gyrData = new ArrayList<>();
-        magData = new ArrayList<>();
         outData = new ArrayList<>();
         tapData = new ArrayList<>();
         limitSensorData = new ArrayList<>();
         ourTimeStamp = new ArrayList<>();
         hundredMilliDataAhead = new ArrayList<>();
         hundredMilliDataBehind = new ArrayList<>();
-
+        DataAhead1 = new ArrayList<>();
         all_clicked_sensorData = new ArrayList<ArrayList<SensorData>>();
-
+        tapDataX1 = new ArrayList<>();
+        tapDataY1 = new ArrayList<>();
+        tapDataZ1 = new ArrayList<>();
+        tapDataM1 = new ArrayList<>();
 
         sensorStarting();
     }
@@ -148,7 +150,6 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                 ourTimeStamp.remove(0);
                 outData.add(data);
                 ourTimeStamp.add(currentTime);
-
             }
         }
         else if(secondStart)
@@ -160,8 +161,7 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
             M = Math.sqrt(Math.pow(x,2)+Math.pow(y,2)+Math.pow(z,2));
             currentTime = System.currentTimeMillis();
             SensorData data = new SensorData(currentTime, x, y, z, M);
-            hundredMilliDataAhead.add(data);
-
+            DataAhead1.add(data);
         }
     }
 
@@ -169,7 +169,6 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
     public void onAccuracyChanged(Sensor sensor, int i) {
 
     }
-
 
     @Override
     public void onClick(View view)
@@ -192,8 +191,50 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                 public void run() {
 
                     secondStart = false;
-                    for(int k = 0; k < hundredMilliDataAhead.size();k++)
+
+                    maxX=DataAhead1.get(0).getX();
+                    maxY=DataAhead1.get(0).getY();
+                    maxZ=DataAhead1.get(0).getZ();
+                    maxM=DataAhead1.get(0).getMagnitude();
+                    for (int i=0;i<DataAhead1.size();i++){
+                        if(DataAhead1.get(i).getX() > maxX){
+                            maxX = DataAhead1.get(i).getX();
+                            t_max_tapX=DataAhead1.get(i).getTimestamp();
+                        }
+                        if(DataAhead1.get(i).getY() > maxY){
+                            maxY = DataAhead1.get(i).getY();
+                            t_max_tapY=DataAhead1.get(i).getTimestamp();
+                        }
+                        if(DataAhead1.get(i).getZ() > maxZ){
+                            maxZ = DataAhead1.get(i).getZ();
+                            t_max_tapZ=DataAhead1.get(i).getTimestamp();
+                        }
+                        if(DataAhead1.get(i).getMagnitude() > maxM){
+                            maxM = DataAhead1.get(i).getMagnitude();
+                            t_max_tapM=DataAhead1.get(i).getTimestamp();
+                        }
+                    }
+                    t_endX=t_max_tapX;
+                    t_endY=t_max_tapY;
+                    t_endZ=t_max_tapZ;
+                    t_endM=t_max_tapM;
+
+                    for (int k = 0; k<=DataAhead1.get((int) t_endX).getTimestamp(); k++){
+                        tapDataX1.add(DataAhead1.get(k));
+                    }
+                    for (int k = 0; k<=DataAhead1.get((int) t_endY).getTimestamp(); k++){
+                        tapDataY1.add(DataAhead1.get(k));
+                    }
+                    for (int k = 0; k<=DataAhead1.get((int) t_endZ).getTimestamp(); k++){
+                        tapDataZ1.add(DataAhead1.get(k));
+                    }
+                    for (int k = 0; k<=DataAhead1.get((int) t_endM).getTimestamp(); k++){
+                        tapDataM1.add(DataAhead1.get(k));
+                    }
+
+                    for(int k = 0; k < DataAhead1.size();k++)
                     {
+                        hundredMilliDataAhead.add(DataAhead1.get(k));
                         Log.d("100msDataAhead",""+hundredMilliDataAhead.get(k).getTimestamp());
                     }
 
@@ -224,12 +265,6 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                         limitSensorData.add(hundredMilliDataAhead.get(i));
                     }
 
-
-                    for(int i=0;i<hundredMilliDataAhead.size()/2;i++){
-                        tapData.add(hundredMilliDataAhead.get(i));
-                        Log.d("Data...",""+tapData.get(i).getTimestamp());
-                    }
-                    t_end=tapData.get(tapData.size()-1).getTimestamp();
                     mean_calculation();
                     standard_deviation_calc();
                     avg_calculation();
@@ -242,41 +277,60 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
             },100);
         }
 
+
         return true;
     }
 
 
     public void mean_calculation()
     {
-        double sumX=0,sumY=0,sumZ=0;
+        double sumX=0,sumY=0,sumZ=0,sumM=0;
 
-        for(int i=0;i<limitSensorData.size();i++){
-            sumX = sumX + limitSensorData.get(i).getX();
-            sumY = sumY + limitSensorData.get(i).getY();
-            sumZ = sumZ + limitSensorData.get(i).getZ();
+        for(int i=0;i<tapDataX1.size();i++) {
+            sumX = sumX + tapDataX1.get(i).getX();
         }
-        meanX=sumX/limitSensorData.size();
-        meanY=sumY/limitSensorData.size();
-        meanZ=sumZ/limitSensorData.size();
+        for(int i=0;i<tapDataY1.size();i++) {
+            sumY = sumY + tapDataY1.get(i).getY();
+        }
+        for(int i=0;i<tapDataZ1.size();i++) {
+            sumZ = sumZ + tapDataZ1.get(i).getZ();
+        }
+        for(int i=0;i<tapDataM1.size();i++) {
+            sumM = sumM + tapDataM1.get(i).getMagnitude();
+        }
+        meanX=sumX/tapDataX1.size();
+        meanY=sumY/tapDataY1.size();
+        meanZ=sumZ/tapDataZ1.size();
+        meanM=sumM/tapDataM1.size();
         Log.d("mean...X..",""+meanX);
         Log.d("mean...Y..",""+meanY);
         Log.d("mean...Z..",""+meanZ);
+        Log.d("mean...M..",""+meanM);
     }
 
     public void standard_deviation_calc(){
-        double sqX=0,sqY=0,sqZ=0;
-        double sdX,sdY,sdZ;
-        for(int i=0;i<limitSensorData.size();i++){
-            sqX = sqX + Math.pow((limitSensorData.get(i).getX()-meanX),2);
-            sqY = sqY + Math.pow((limitSensorData.get(i).getY()-meanY),2);
-            sqZ = sqZ + Math.pow((limitSensorData.get(i).getZ()-meanZ),2);
+        double sqX=0,sqY=0,sqZ=0,sqM=0;
+        double sdX,sdY,sdZ,sdM;
+        for(int i=0;i<tapDataX1.size();i++) {
+            sqX = sqX + Math.pow((tapDataX1.get(i).getX()-meanX),2);
         }
-        sdX=Math.sqrt(sqX/(limitSensorData.size()-1));
-        sdY=Math.sqrt(sqY/(limitSensorData.size()-1));
-        sdZ=Math.sqrt(sqZ/(limitSensorData.size()-1));
+        for(int i=0;i<tapDataY1.size();i++) {
+            sqY = sqY + Math.pow((tapDataY1.get(i).getY()-meanY),2);
+        }
+        for(int i=0;i<tapDataZ1.size();i++) {
+            sqZ = sqZ + Math.pow((tapDataZ1.get(i).getZ()-meanZ),2);
+        }
+        for(int i=0;i<tapDataM1.size();i++) {
+            sqM = sqM + Math.pow((tapDataM1.get(i).getMagnitude()-meanM),2);
+        }
+        sdX=Math.sqrt(sqX/(tapDataX1.size()-1));
+        sdY=Math.sqrt(sqY/(tapDataY1.size()-1));
+        sdZ=Math.sqrt(sqZ/(tapDataZ1.size()-1));
+        sdM=Math.sqrt(sqM/(tapDataM1.size()-1));
         Log.d("standard deviation..X",""+sdX);
         Log.d("standard deviation..Y",""+sdY);
         Log.d("standard deviation..Z",""+sdZ);
+        Log.d("standard deviation..M",""+sdM);
     }
 
     public void avg_calculation(){
@@ -296,47 +350,42 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
     }
 
     public void net_change(){
-        double avgX,avgY,avgZ,sX=0,sY=0,sZ=0,ncX,ncY,ncZ;
-        for(int i=0;i<tapData.size();i++){
-            sX = sX + tapData.get(i).getX();
-            sY = sY + tapData.get(i).getY();
-            sZ = sZ + tapData.get(i).getZ();
+        double avgX,avgY,avgZ,avgM,sX=0,sY=0,sZ=0,sM=0,ncX,ncY,ncZ,ncM;
+        for(int i=0;i<tapDataX1.size();i++) {
+            sX = sX + tapDataX1.get(i).getX();
         }
-        avgX=sX/tapData.size();
-        avgY=sY/tapData.size();
-        avgZ=sZ/tapData.size();
+        for(int i=0;i<tapDataY1.size();i++) {
+            sY = sY + tapDataY1.get(i).getY();
+        }
+        for(int i=0;i<tapDataZ1.size();i++) {
+            sZ = sZ + tapDataZ1.get(i).getZ();
+        }
+        for(int i=0;i<tapDataM1.size();i++) {
+            sM = sM + tapDataM1.get(i).getMagnitude();
+        }
+        avgX=sX/tapDataX1.size();
+        avgY=sY/tapDataY1.size();
+        avgZ=sZ/tapDataZ1.size();
+        avgM=sM/tapDataM1.size();
         ncX=avgX-avg100msBefore;
         ncY=avgY-avg100msBefore;
         ncZ=avgZ-avg100msBefore;
+        ncM=avgM-avg100msBefore;
         Log.d("Net change..X...",""+ncX);
         Log.d("Net change..Y...",""+ncY);
         Log.d("Net change..Z...",""+ncZ);
+        Log.d("Net change..M...",""+ncM);
     }
     public void max_change(){
-        double mcX,mcY,mcZ;
-        maxX=tapData.get(0).getX();
-        maxY=tapData.get(0).getY();
-        maxZ=tapData.get(0).getZ();
-        for(int i=0; i<tapData.size(); i++){
-            if(tapData.get(i).getX() > maxX){
-                maxX = tapData.get(i).getX();
-                t_max_tapX=tapData.get(i).getTimestamp();
-            }
-            if(tapData.get(i).getY() > maxY){
-                maxY = tapData.get(i).getY();
-                t_max_tapY=tapData.get(i).getTimestamp();
-            }
-            if(tapData.get(i).getZ() > maxZ){
-                maxZ = tapData.get(i).getZ();
-                t_max_tapZ=tapData.get(i).getTimestamp();
-            }
-        }
+        double mcX,mcY,mcZ,mcM;
         mcX=maxX-avg100msBefore;
         mcY=maxY-avg100msBefore;
         mcZ=maxZ-avg100msBefore;
+        mcM=maxM-avg100msBefore;
         Log.d("Maximum Change in X",""+mcX);
         Log.d("Maximum Change in Y",""+mcY);
         Log.d("Maximum Change in Z",""+mcZ);
+        Log.d("Maximum Change in M",""+mcM);
     }
 
    /* public void diff_time(){
@@ -358,13 +407,14 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
     }
 
     public void max_to_avg(){
-        long max2avgX, max2avgY, max2avgZ;
+        long max2avgX, max2avgY, max2avgZ, max2avgM;
         max2avgX= (long) ((t_after_center-t_max_tapX)/(avg100msAfter-maxX));
         max2avgY= (long) ((t_after_center-t_max_tapY)/(avg100msAfter-maxY));
         max2avgZ= (long) ((t_after_center-t_max_tapZ)/(avg100msAfter-maxZ));
+        max2avgM= (long) ((t_after_center-t_max_tapM)/(avg100msAfter-maxM));
         Log.d("Max_to_avg..X",""+max2avgX);
         Log.d("Max_to_avg..Y",""+max2avgY);
         Log.d("Max_to_avg..Z",""+max2avgZ);
+        Log.d("Max_to_avg..M",""+max2avgM);
     }
 }
-
