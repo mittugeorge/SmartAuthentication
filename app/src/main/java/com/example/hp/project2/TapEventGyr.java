@@ -27,12 +27,20 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
     private boolean started = false, secondStart = false;
     private double x, y, z, M, maxX, maxY, maxZ, maxM;
     private long t_start, t_endX, t_endY, t_endZ, t_endM,
-            avg100msBefore, avg100msAfter, diff;
-    long currentTime, t_after_center, t_max_tapX, t_max_tapY, t_max_tapZ, t_max_tapM;
+            avg100msBefore, avg100msAfterX,avg100msAfterY,avg100msAfterZ,avg100msAfterM, diffX, diffY, diffZ, diffM;
+    long currentTime, t_after_centerX, t_after_centerY,t_after_centerZ, t_after_centerM, t_max_tapX, t_max_tapY, t_max_tapZ, t_max_tapM;
     private long t = 1;
     private double meanX, meanY, meanZ, meanM;
+    private double sdX,sdY,sdZ,sdM;
+    private double ncX,ncY,ncZ,ncM;
+    private double mcX,mcY,mcZ,mcM;
+    private long durX, durY, durZ, durM;
+    private long max2avgX, max2avgY, max2avgZ, max2avgM;
     ArrayList<SensorData> tapData;
-    ArrayList<SensorData> hundredMilliDataAhead;
+    ArrayList<SensorData> hundredMilliDataAheadX2;
+    ArrayList<SensorData> hundredMilliDataAheadY2;
+    ArrayList<SensorData> hundredMilliDataAheadZ2;
+    ArrayList<SensorData> hundredMilliDataAheadM2;
     List<SensorData> hundredMilliDataBehind;
     ArrayList<SensorData> gyrData;
     ArrayList<String> timeStamp;
@@ -75,7 +83,10 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
         tapData = new ArrayList<>();
         limitSensorData = new ArrayList<>();
         gyrTimeStamp = new ArrayList<>();
-        hundredMilliDataAhead = new ArrayList<>();
+        hundredMilliDataAheadX2 = new ArrayList<>();
+        hundredMilliDataAheadY2 = new ArrayList<>();
+        hundredMilliDataAheadZ2 = new ArrayList<>();
+        hundredMilliDataAheadM2 = new ArrayList<>();
         hundredMilliDataBehind = new ArrayList<>();
         all_clicked_sensorData = new ArrayList<ArrayList<SensorData>>();
         DataAhead2 = new ArrayList<>();
@@ -199,24 +210,80 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
                     t_endZ = t_max_tapZ;
                     t_endM = t_max_tapM;
 
-                    for (int k = 0; k <= DataAhead2.get((int) t_endX).getTimestamp(); k++) {
+                    int k1=DataAhead2.indexOf(t_endX);
+                    int k2=DataAhead2.indexOf(t_endY);
+                    int k3=DataAhead2.indexOf(t_endZ);
+                    int k4=DataAhead2.indexOf(t_endM);
+
+                    for (int k = 0; k <= k1; k++) {
                         tapDataX2.add(DataAhead2.get(k));
                     }
-                    for (int k = 0; k <= DataAhead2.get((int) t_endY).getTimestamp(); k++) {
+                    for (int k = 0; k <= k2; k++) {
                         tapDataY2.add(DataAhead2.get(k));
                     }
-                    for (int k = 0; k <= DataAhead2.get((int) t_endZ).getTimestamp(); k++) {
+                    for (int k = 0; k <= k3; k++) {
                         tapDataZ2.add(DataAhead2.get(k));
                     }
-                    for (int k = 0; k <= DataAhead2.get((int) t_endM).getTimestamp(); k++) {
+                    for (int k = 0; k <= k4; k++) {
                         tapDataM2.add(DataAhead2.get(k));
                     }
 
-                    for (int k = 0; k < DataAhead2.size(); k++) {
-                        hundredMilliDataAhead.add(DataAhead2.get(k));
-                        Log.d("100msDataAhead", "" + hundredMilliDataAhead.get(k).getTimestamp());
+                    long tmp1=t_endX+100;
+                    long tmp2=t_endY+100;
+                    long tmp3=t_endZ+100;
+                    long tmp4=t_endM+100;
+                    int t1 = 0,t2=0,t3=0,t4=0;
+
+                    for(int k = 0;k < DataAhead2.size();k--)
+                    {
+                        if (DataAhead2.get(k).getTimestamp() >= tmp1) {
+                            t1 = k;
+                            break;
+                        }
+                    }
+                    for(int k = 0;k < DataAhead2.size();k--)
+                    {
+                        if (DataAhead2.get(k).getTimestamp() >= tmp2) {
+                            t2 = k;
+                            break;
+                        }
+                    }
+                    for(int k = 0;k < DataAhead2.size();k--)
+                    {
+                        if (DataAhead2.get(k).getTimestamp() >= tmp3) {
+                            t3 = k;
+                            break;
+                        }
+                    }
+                    for(int k = 0;k < DataAhead2.size();k--)
+                    {
+                        if (DataAhead2.get(k).getTimestamp() >= tmp4) {
+                            t4 = k;
+                            break;
+                        }
                     }
 
+                    for(int k = k1; k < t1;k++)
+                    {
+                        hundredMilliDataAheadX2.add(DataAhead2.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadX2.get(k).getTimestamp());
+                    }
+                    for(int k = k2; k < t2;k++)
+                    {
+                        hundredMilliDataAheadY2.add(DataAhead2.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadY2.get(k).getTimestamp());
+                    }
+                    for(int k = k3; k < t3;k++)
+                    {
+                        hundredMilliDataAheadZ2.add(DataAhead2.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadZ2.get(k).getTimestamp());
+                    }
+                    for(int k = k4; k < t4;k++)
+                    {
+                        hundredMilliDataAheadM2.add(DataAhead2.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadM2.get(k).getTimestamp());
+                    }
+                    
                     long substractedTimeStamp = TappedCurrentTimeStamp_test - 100;
                     long temp2 = 0;
                     int temp = 0;
@@ -235,12 +302,6 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
                         Log.d("100msDataBehind", "" + hundredMilliDataBehind.get(k).getTimestamp());
                     }
 
-                    limitSensorData.addAll(hundredMilliDataBehind);
-
-                    for (int i = 0; i < hundredMilliDataAhead.size(); i++) {
-                        limitSensorData.add(hundredMilliDataAhead.get(i));
-                    }
-
                     mean_calculation();
                     standard_deviation_calc();
                     avg_calculation();
@@ -250,7 +311,7 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
                     duration();
                     max_to_avg();
                 }
-            }, 100);
+            }, 200);
         }
 
 
@@ -284,7 +345,6 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
 
     public void standard_deviation_calc() {
         double sqX = 0, sqY = 0, sqZ = 0, sqM = 0;
-        double sdX, sdY, sdZ, sdM;
         for (int i = 0; i < tapDataX2.size(); i++) {
             sqX = sqX + Math.pow((tapDataX2.get(i).getX() - meanX), 2);
         }
@@ -314,17 +374,35 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
         }
         avg100msBefore = t / hundredMilliDataBehind.size();
         Log.d("avg100msBefore......", "" + avg100msBefore);
-        for (int i = 0; i < hundredMilliDataAhead.size(); i++) {
-            t1 = t1 + hundredMilliDataAhead.get(i).getTimestamp();
+        for (int i = 0; i < hundredMilliDataAheadX2.size(); i++) {
+            t1 = t1 + hundredMilliDataAheadX2.get(i).getTimestamp();
         }
-        avg100msAfter = t1 / hundredMilliDataAhead.size();
-        Log.d("avg100msAfter......", "" + avg100msAfter);
-        diff = avg100msAfter - avg100msBefore;
-        Log.d("Difference....", "" + diff);
+        for (int i = 0; i < hundredMilliDataAheadY2.size(); i++) {
+            t1 = t1 + hundredMilliDataAheadY2.get(i).getTimestamp();
+        }
+        for (int i = 0; i < hundredMilliDataAheadZ2.size(); i++) {
+            t1 = t1 + hundredMilliDataAheadZ2.get(i).getTimestamp();
+        }
+        for (int i = 0; i < hundredMilliDataAheadM2.size(); i++) {
+            t1 = t1 + hundredMilliDataAheadM2.get(i).getTimestamp();
+        }
+        avg100msAfterX = t1 / hundredMilliDataAheadX2.size();
+        avg100msAfterY = t1 / hundredMilliDataAheadY2.size();
+        avg100msAfterZ = t1 / hundredMilliDataAheadZ2.size();
+        avg100msAfterM = t1 / hundredMilliDataAheadM2.size();
+        //Log.d("avg100msAfter......", "" + avg100msAfter);
+        diffX = avg100msAfterX - avg100msBefore;
+        diffY = avg100msAfterY - avg100msBefore;
+        diffZ = avg100msAfterZ - avg100msBefore;
+        diffM = avg100msAfterM - avg100msBefore;
+        Log.d("Difference..X..", "" + diffX);
+        Log.d("Difference..Y..", "" + diffY);
+        Log.d("Difference..Z..", "" + diffZ);
+        Log.d("Difference..M..", "" + diffM);
     }
 
     public void net_change() {
-        double avgX, avgY, avgZ, avgM, sX = 0, sY = 0, sZ = 0, sM = 0, ncX, ncY, ncZ, ncM;
+        double avgX, avgY, avgZ, avgM, sX = 0, sY = 0, sZ = 0, sM = 0;
         for (int i = 0; i < tapDataX2.size(); i++) {
             sX = sX + tapDataX2.get(i).getX();
         }
@@ -352,7 +430,6 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
     }
 
     public void max_change() {
-        double mcX, mcY, mcZ, mcM;
         mcX = maxX - avg100msBefore;
         mcY = maxY - avg100msBefore;
         mcZ = maxZ - avg100msBefore;
@@ -374,19 +451,27 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
     }*/
 
     public void duration() {
-        long dur, t_before_center;
-        t_after_center = hundredMilliDataAhead.get(hundredMilliDataAhead.size() / 2).getTimestamp();
+        long t_before_center;
+        t_after_centerX = hundredMilliDataAheadX2.get(hundredMilliDataAheadX2.size() / 2).getTimestamp();
+        t_after_centerY = hundredMilliDataAheadY2.get(hundredMilliDataAheadY2.size() / 2).getTimestamp();
+        t_after_centerZ = hundredMilliDataAheadZ2.get(hundredMilliDataAheadZ2.size() / 2).getTimestamp();
+        t_after_centerM = hundredMilliDataAheadM2.get(hundredMilliDataAheadM2.size() / 2).getTimestamp();
         t_before_center = hundredMilliDataBehind.get(hundredMilliDataBehind.size() / 2).getTimestamp();
-        dur = (t_after_center - t_before_center) / diff;
-        Log.d("Normalized time duratio", "" + dur);
+        durX = (t_after_centerX - t_before_center) / diffX;
+        durY = (t_after_centerY - t_before_center) / diffY;
+        durZ = (t_after_centerZ - t_before_center) / diffZ;
+        durM = (t_after_centerM - t_before_center) / diffM;
+        Log.d("Normalized time dur..X", "" + durX);
+        Log.d("Normalized time dur..Y", "" + durY);
+        Log.d("Normalized time dur..Z", "" + durZ);
+        Log.d("Normalized time dur..M", "" + durM);
     }
 
     public void max_to_avg() {
-        long max2avgX, max2avgY, max2avgZ, max2avgM;
-        max2avgX = (long) ((t_after_center - t_max_tapX) / (avg100msAfter - maxX));
-        max2avgY = (long) ((t_after_center - t_max_tapY) / (avg100msAfter - maxY));
-        max2avgZ = (long) ((t_after_center - t_max_tapZ) / (avg100msAfter - maxZ));
-        max2avgM = (long) ((t_after_center - t_max_tapM) / (avg100msAfter - maxM));
+        max2avgX = (long) ((t_after_centerX - t_max_tapX) / (avg100msAfterX - maxX));
+        max2avgY = (long) ((t_after_centerY - t_max_tapY) / (avg100msAfterY - maxY));
+        max2avgZ = (long) ((t_after_centerZ - t_max_tapZ) / (avg100msAfterZ - maxZ));
+        max2avgM = (long) ((t_after_centerM - t_max_tapM) / (avg100msAfterM - maxM));
         Log.d("Max_to_avg..X", "" + max2avgX);
         Log.d("Max_to_avg..Y", "" + max2avgY);
         Log.d("Max_to_avg..Z", "" + max2avgZ);

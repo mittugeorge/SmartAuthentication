@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -34,13 +35,23 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
     private boolean started = false,secondStart = false;
     private double x, y, z, M, maxX, maxY, maxZ, maxM;
     private long t_start, t_endX, t_endY, t_endZ, t_endM,
-            avg100msBefore, avg100msAfter, diff;
-    long currentTime, t_after_center, t_max_tapX, t_max_tapY, t_max_tapZ, t_max_tapM;
+            avg100msBefore, avg100msAfterX, avg100msAfterY, avg100msAfterZ, avg100msAfterM,
+            diffX, diffY, diffZ, diffM;
+    long currentTime, t_after_centerX,t_after_centerY,t_after_centerZ,t_after_centerM,
+            t_max_tapX, t_max_tapY, t_max_tapZ, t_max_tapM;
     private long t = 1;
     private double meanX, meanY, meanZ, meanM;
+    private double sdX,sdY,sdZ,sdM;
+    private double ncX,ncY,ncZ,ncM;
+    private double mcX,mcY,mcZ,mcM;
+    private long durX, durY, durZ, durM;
+    private long max2avgX, max2avgY, max2avgZ, max2avgM;
     ArrayList<SensorData> outData;
     ArrayList<SensorData> tapData;
-    ArrayList<SensorData> hundredMilliDataAhead;
+    ArrayList<SensorData> hundredMilliDataAheadX1;
+    ArrayList<SensorData> hundredMilliDataAheadY1;
+    ArrayList<SensorData> hundredMilliDataAheadZ1;
+    ArrayList<SensorData> hundredMilliDataAheadM1;
     List<SensorData> hundredMilliDataBehind;
     ArrayList<String> timeStamp;
     ArrayList<Long> ourTimeStamp;
@@ -83,7 +94,10 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
         tapData = new ArrayList<>();
         limitSensorData = new ArrayList<>();
         ourTimeStamp = new ArrayList<>();
-        hundredMilliDataAhead = new ArrayList<>();
+        hundredMilliDataAheadX1 = new ArrayList<>();
+        hundredMilliDataAheadY1 = new ArrayList<>();
+        hundredMilliDataAheadZ1 = new ArrayList<>();
+        hundredMilliDataAheadM1 = new ArrayList<>();
         hundredMilliDataBehind = new ArrayList<>();
         DataAhead1 = new ArrayList<>();
         all_clicked_sensorData = new ArrayList<ArrayList<SensorData>>();
@@ -219,23 +233,78 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                     t_endZ=t_max_tapZ;
                     t_endM=t_max_tapM;
 
-                    for (int k = 0; k<=DataAhead1.get((int) t_endX).getTimestamp(); k++){
+                    int k1=DataAhead1.indexOf(t_endX);
+                    int k2=DataAhead1.indexOf(t_endY);
+                    int k3=DataAhead1.indexOf(t_endZ);
+                    int k4=DataAhead1.indexOf(t_endM);
+
+                    for (int k = 0; k<=k1; k++){
                         tapDataX1.add(DataAhead1.get(k));
                     }
-                    for (int k = 0; k<=DataAhead1.get((int) t_endY).getTimestamp(); k++){
+                    for (int k = 0; k<=k2; k++){
                         tapDataY1.add(DataAhead1.get(k));
                     }
-                    for (int k = 0; k<=DataAhead1.get((int) t_endZ).getTimestamp(); k++){
+                    for (int k = 0; k<=k3; k++){
                         tapDataZ1.add(DataAhead1.get(k));
                     }
-                    for (int k = 0; k<=DataAhead1.get((int) t_endM).getTimestamp(); k++){
+                    for (int k = 0; k<=k4; k++){
                         tapDataM1.add(DataAhead1.get(k));
                     }
 
-                    for(int k = 0; k < DataAhead1.size();k++)
+                    long tmp1=t_endX+100;
+                    long tmp2=t_endY+100;
+                    long tmp3=t_endZ+100;
+                    long tmp4=t_endM+100;
+                    int t1 = 0,t2=0,t3=0,t4=0;
+
+                    for(int k = 0;k < DataAhead1.size();k--)
                     {
-                        hundredMilliDataAhead.add(DataAhead1.get(k));
-                        Log.d("100msDataAhead",""+hundredMilliDataAhead.get(k).getTimestamp());
+                        if (DataAhead1.get(k).getTimestamp() >= tmp1) {
+                            t1 = k;
+                            break;
+                        }
+                    }
+                    for(int k = 0;k < DataAhead1.size();k--)
+                    {
+                        if (DataAhead1.get(k).getTimestamp() >= tmp2) {
+                            t2 = k;
+                            break;
+                        }
+                    }
+                    for(int k = 0;k < DataAhead1.size();k--)
+                    {
+                        if (DataAhead1.get(k).getTimestamp() >= tmp3) {
+                            t3 = k;
+                            break;
+                        }
+                    }
+                    for(int k = 0;k < DataAhead1.size();k--)
+                    {
+                        if (DataAhead1.get(k).getTimestamp() >= tmp4) {
+                            t4 = k;
+                            break;
+                        }
+                    }
+
+                    for(int k = k1; k < t1;k++)
+                    {
+                        hundredMilliDataAheadX1.add(DataAhead1.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadX1.get(k).getTimestamp());
+                    }
+                    for(int k = k2; k < t2;k++)
+                    {
+                        hundredMilliDataAheadY1.add(DataAhead1.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadY1.get(k).getTimestamp());
+                    }
+                    for(int k = k3; k < t3;k++)
+                    {
+                        hundredMilliDataAheadZ1.add(DataAhead1.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadZ1.get(k).getTimestamp());
+                    }
+                    for(int k = k4; k < t4;k++)
+                    {
+                        hundredMilliDataAheadM1.add(DataAhead1.get(k));
+                        Log.d("100msDataAhead",""+hundredMilliDataAheadM1.get(k).getTimestamp());
                     }
 
                     long substractedTimeStamp = TappedCurrentTimeStamp_test - 100;
@@ -258,13 +327,6 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                         Log.d("100msDataBehind",""+hundredMilliDataBehind.get(k).getTimestamp());
                     }
 
-                    limitSensorData.addAll(hundredMilliDataBehind);
-
-                    for(int i =0 ; i< hundredMilliDataAhead.size();i++)
-                    {
-                        limitSensorData.add(hundredMilliDataAhead.get(i));
-                    }
-
                     mean_calculation();
                     standard_deviation_calc();
                     avg_calculation();
@@ -273,8 +335,18 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                //     diff_time();
                     duration();
                     max_to_avg();
+
+                    AccRead a=new AccRead();
+                    a.execute(Double.toString(meanX),Double.toString(meanY),Double.toString(meanZ),Double.toString(meanM),
+                            Double.toString(sdX),Double.toString(sdY),Double.toString(sdZ),Double.toString(sdM),
+                            Double.toString(diffX),Double.toString(diffY),Double.toString(diffZ),Double.toString(diffM),
+                            Double.toString(ncX),Double.toString(ncY),Double.toString(ncZ),Double.toString(ncM),
+                            Double.toString(mcX),Double.toString(mcY),Double.toString(mcZ),Double.toString(mcM),
+                            Double.toString(durX),Double.toString(durY),Double.toString(durZ),Double.toString(durM),
+                            Double.toString(max2avgX),Double.toString(max2avgY),Double.toString(max2avgZ),Double.toString(max2avgM));
+
                 }
-            },100);
+            },200);
         }
 
 
@@ -310,7 +382,7 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
 
     public void standard_deviation_calc(){
         double sqX=0,sqY=0,sqZ=0,sqM=0;
-        double sdX,sdY,sdZ,sdM;
+
         for(int i=0;i<tapDataX1.size();i++) {
             sqX = sqX + Math.pow((tapDataX1.get(i).getX()-meanX),2);
         }
@@ -340,17 +412,35 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
         }
         avg100msBefore=t/hundredMilliDataBehind.size();
         Log.d("avg100msBefore......",""+avg100msBefore);
-        for(int i=0;i<hundredMilliDataAhead.size();i++){
-            t1 = t1 + hundredMilliDataAhead.get(i).getTimestamp();
+        for(int i=0;i<hundredMilliDataAheadX1.size();i++){
+            t1 = t1 + hundredMilliDataAheadX1.get(i).getTimestamp();
         }
-        avg100msAfter=t1/hundredMilliDataAhead.size();
-        Log.d("avg100msAfter......",""+avg100msAfter);
-        diff=avg100msAfter-avg100msBefore;
-        Log.d("Difference....",""+diff);
+        for(int i=0;i<hundredMilliDataAheadY1.size();i++){
+            t1 = t1 + hundredMilliDataAheadY1.get(i).getTimestamp();
+        }
+        for(int i=0;i<hundredMilliDataAheadZ1.size();i++){
+            t1 = t1 + hundredMilliDataAheadZ1.get(i).getTimestamp();
+        }
+        for(int i=0;i<hundredMilliDataAheadM1.size();i++){
+            t1 = t1 + hundredMilliDataAheadM1.get(i).getTimestamp();
+        }
+        avg100msAfterX=t1/hundredMilliDataAheadX1.size();
+        avg100msAfterY=t1/hundredMilliDataAheadY1.size();
+        avg100msAfterZ=t1/hundredMilliDataAheadZ1.size();
+        avg100msAfterM=t1/hundredMilliDataAheadM1.size();
+        //Log.d("avg100msAfter......",""+avg100msAfter);
+        diffX=avg100msAfterX-avg100msBefore;
+        diffY=avg100msAfterY-avg100msBefore;
+        diffZ=avg100msAfterZ-avg100msBefore;
+        diffM=avg100msAfterM-avg100msBefore;
+        Log.d("Difference..X..",""+diffX);
+        Log.d("Difference..Y..",""+diffY);
+        Log.d("Difference..Z..",""+diffZ);
+        Log.d("Difference..M..",""+diffM);
     }
 
     public void net_change(){
-        double avgX,avgY,avgZ,avgM,sX=0,sY=0,sZ=0,sM=0,ncX,ncY,ncZ,ncM;
+        double avgX,avgY,avgZ,avgM,sX=0,sY=0,sZ=0,sM=0;
         for(int i=0;i<tapDataX1.size();i++) {
             sX = sX + tapDataX1.get(i).getX();
         }
@@ -377,7 +467,6 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
         Log.d("Net change..M...",""+ncM);
     }
     public void max_change(){
-        double mcX,mcY,mcZ,mcM;
         mcX=maxX-avg100msBefore;
         mcY=maxY-avg100msBefore;
         mcZ=maxZ-avg100msBefore;
@@ -399,22 +488,75 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
     }*/
 
     public void duration(){
-        long dur, t_before_center;
-        t_after_center=hundredMilliDataAhead.get(hundredMilliDataAhead.size()/2).getTimestamp();
+        long t_before_center;
+        t_after_centerX=hundredMilliDataAheadX1.get(hundredMilliDataAheadX1.size()/2).getTimestamp();
+        t_after_centerY=hundredMilliDataAheadY1.get(hundredMilliDataAheadY1.size()/2).getTimestamp();
+        t_after_centerZ=hundredMilliDataAheadZ1.get(hundredMilliDataAheadZ1.size()/2).getTimestamp();
+        t_after_centerM=hundredMilliDataAheadM1.get(hundredMilliDataAheadM1.size()/2).getTimestamp();
         t_before_center=hundredMilliDataBehind.get(hundredMilliDataBehind.size()/2).getTimestamp();
-        dur=(t_after_center-t_before_center)/diff;
-        Log.d("Normalized time duratio",""+dur);
+        durX=(t_after_centerX-t_before_center)/diffX;
+        durY=(t_after_centerY-t_before_center)/diffY;
+        durZ=(t_after_centerZ-t_before_center)/diffZ;
+        durM=(t_after_centerM-t_before_center)/diffM;
+        Log.d("Normalized time dur..X",""+durX);
+        Log.d("Normalized time dur..Y",""+durY);
+        Log.d("Normalized time dur..Z",""+durZ);
+        Log.d("Normalized time dur..M",""+durM);
     }
 
     public void max_to_avg(){
-        long max2avgX, max2avgY, max2avgZ, max2avgM;
-        max2avgX= (long) ((t_after_center-t_max_tapX)/(avg100msAfter-maxX));
-        max2avgY= (long) ((t_after_center-t_max_tapY)/(avg100msAfter-maxY));
-        max2avgZ= (long) ((t_after_center-t_max_tapZ)/(avg100msAfter-maxZ));
-        max2avgM= (long) ((t_after_center-t_max_tapM)/(avg100msAfter-maxM));
+        max2avgX= (long) ((t_after_centerX-t_max_tapX)/(avg100msAfterX-maxX));
+        max2avgY= (long) ((t_after_centerY-t_max_tapY)/(avg100msAfterY-maxY));
+        max2avgZ= (long) ((t_after_centerZ-t_max_tapZ)/(avg100msAfterZ-maxZ));
+        max2avgM= (long) ((t_after_centerM-t_max_tapM)/(avg100msAfterM-maxM));
         Log.d("Max_to_avg..X",""+max2avgX);
         Log.d("Max_to_avg..Y",""+max2avgY);
         Log.d("Max_to_avg..Z",""+max2avgZ);
         Log.d("Max_to_avg..M",""+max2avgM);
+    }
+
+    private class AccRead extends AsyncTask<String,String,String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            WebServiceCaller wc=new WebServiceCaller();
+            wc.setSoapObject("Accel");
+            wc.addProperty("f1x",strings[0]);
+            wc.addProperty("f1y",strings[1]);
+            wc.addProperty("f1z",strings[2]);
+            wc.addProperty("f1m",strings[3]);
+            wc.addProperty("f2x",strings[4]);
+            wc.addProperty("f2y",strings[5]);
+            wc.addProperty("f2z",strings[6]);
+            wc.addProperty("f2m",strings[7]);
+            wc.addProperty("f3x",strings[8]);
+            wc.addProperty("f3y",strings[9]);
+            wc.addProperty("f3z",strings[10]);
+            wc.addProperty("f3m",strings[11]);
+            wc.addProperty("f4x",strings[12]);
+            wc.addProperty("f4y",strings[13]);
+            wc.addProperty("f4z",strings[14]);
+            wc.addProperty("f4m",strings[15]);
+            wc.addProperty("f5x",strings[16]);
+            wc.addProperty("f5y",strings[17]);
+            wc.addProperty("f5z",strings[18]);
+            wc.addProperty("f5m",strings[19]);
+            wc.addProperty("f6x",strings[20]);
+            wc.addProperty("f6y",strings[21]);
+            wc.addProperty("f6z",strings[22]);
+            wc.addProperty("f6m",strings[23]);
+            wc.addProperty("f7x",strings[24]);
+            wc.addProperty("f7y",strings[25]);
+            wc.addProperty("f7z",strings[26]);
+            wc.addProperty("f7m",strings[27]);
+            wc.callWebService();
+
+            return wc.getResponse();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Toast.makeText(TapEventNew.this, s, Toast.LENGTH_SHORT).show();
+        }
     }
 }
