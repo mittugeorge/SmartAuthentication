@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +36,8 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
     private double sdX,sdY,sdZ,sdM;
     private double ncX,ncY,ncZ,ncM;
     private double mcX,mcY,mcZ,mcM;
-    private long durX, durY, durZ, durM;
-    private long max2avgX, max2avgY, max2avgZ, max2avgM;
+    private double durX, durY, durZ, durM;
+    private double max2avgX, max2avgY, max2avgZ, max2avgM;
     ArrayList<SensorData> tapData;
     ArrayList<SensorData> hundredMilliDataAheadX3;
     ArrayList<SensorData> hundredMilliDataAheadY3;
@@ -73,11 +75,17 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
         bt_zero = (Button) findViewById(R.id.bt_zero);
         bt_submit = (Button) findViewById(R.id.bt_submit);
         tv_enter = (TextView) findViewById(R.id.tv_enter);
-        bt_one.setOnClickListener(this);
-        bt_three.setOnClickListener(this);
-        bt_seven.setOnClickListener(this);
         bt_one.setOnTouchListener(this);
-        bt_submit.setOnClickListener(this);
+        bt_two.setOnTouchListener(this);
+        bt_three.setOnTouchListener(this);
+        bt_four.setOnTouchListener(this);
+        bt_five.setOnTouchListener(this);
+        bt_six.setOnTouchListener(this);
+        bt_seven.setOnTouchListener(this);
+        bt_eight.setOnTouchListener(this);
+        bt_nine.setOnTouchListener(this);
+        bt_zero.setOnTouchListener(this);
+        bt_submit.setOnTouchListener(this);
         timeStamp = new ArrayList<>();
         magData = new ArrayList<>();
         tapData = new ArrayList<>();
@@ -205,15 +213,44 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
                             t_max_tapM = DataAhead3.get(i).getTimestamp();
                         }
                     }
-                    t_endX = t_max_tapX;
-                    t_endY = t_max_tapY;
-                    t_endZ = t_max_tapZ;
-                    t_endM = t_max_tapM;
 
-                    int k1=DataAhead3.indexOf(t_endX);
-                    int k2=DataAhead3.indexOf(t_endY);
-                    int k3=DataAhead3.indexOf(t_endZ);
-                    int k4=DataAhead3.indexOf(t_endM);
+                    if(t_max_tapX==0) {
+                        t_endX=DataAhead3.get(DataAhead3.indexOf(t_max_tapX)+1).getTimestamp();
+                    }
+                    else t_endX = t_max_tapX;
+                    if(t_max_tapY==0) {
+                        t_endY=DataAhead3.get(DataAhead3.indexOf(t_max_tapY)+1).getTimestamp();
+                    }
+                    else t_endY=t_max_tapY;
+                    if(t_max_tapZ==0) {
+                        t_endZ=DataAhead3.get(DataAhead3.indexOf(t_max_tapZ)+1).getTimestamp();
+                    }
+                    else t_endZ=t_max_tapZ;
+                    if(t_max_tapM==0) {
+                        t_endM=DataAhead3.get(DataAhead3.indexOf(t_max_tapM)+1).getTimestamp();
+                    }
+                    else t_endM=t_max_tapM;
+
+//                    int k1=DataAhead3.indexOf(t_endX);
+//                    int k2=DataAhead3.indexOf(t_endY);
+//                    int k3=DataAhead3.indexOf(t_endZ);
+//                    int k4=DataAhead3.indexOf(t_endM);
+
+                    int k1=0,k2=0,k3=0,k4=0;
+                    for (int i = 0; i <  DataAhead3.size(); i++) {
+                        if(DataAhead3.get(i).getTimestamp() == t_endX){
+                            k1=i;
+                        }
+                        if(DataAhead3.get(i).getTimestamp() == t_endY){
+                            k2=i;
+                        }
+                        if(DataAhead3.get(i).getTimestamp() == t_endZ){
+                            k3=i;
+                        }
+                        if(DataAhead3.get(i).getTimestamp() == t_endM){
+                            k4=i;
+                        }
+                    }
 
                     for (int k = 0; k <= k1; k++) {
                         tapDataX3.add(DataAhead3.get(k));
@@ -228,60 +265,60 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
                         tapDataM3.add(DataAhead3.get(k));
                     }
 
-                    long tmp1=t_endX+100;
-                    long tmp2=t_endY+100;
-                    long tmp3=t_endZ+100;
-                    long tmp4=t_endM+100;
-                    int t1 = 0,t2=0,t3=0,t4=0;
+//                    long tmp1=t_endX+100;
+//                    long tmp2=t_endY+100;
+//                    long tmp3=t_endZ+100;
+//                    long tmp4=t_endM+100;
+//                    int t1 = 0,t2=0,t3=0,t4=0;
+//
+//                    for(int k = 0;k < DataAhead3.size();k--)
+//                    {
+//                        if (DataAhead3.get(k).getTimestamp() >= tmp1) {
+//                            t1 = k;
+//                            break;
+//                        }
+//                    }
+//                    for(int k = 0;k < DataAhead3.size();k--)
+//                    {
+//                        if (DataAhead3.get(k).getTimestamp() >= tmp2) {
+//                            t2 = k;
+//                            break;
+//                        }
+//                    }
+//                    for(int k = 0;k < DataAhead3.size();k--)
+//                    {
+//                        if (DataAhead3.get(k).getTimestamp() >= tmp3) {
+//                            t3 = k;
+//                            break;
+//                        }
+//                    }
+//                    for(int k = 0;k < DataAhead3.size();k--)
+//                    {
+//                        if (DataAhead3.get(k).getTimestamp() >= tmp4) {
+//                            t4 = k;
+//                            break;
+//                        }
+//                    }
 
-                    for(int k = 0;k < DataAhead3.size();k--)
-                    {
-                        if (DataAhead3.get(k).getTimestamp() >= tmp1) {
-                            t1 = k;
-                            break;
-                        }
-                    }
-                    for(int k = 0;k < DataAhead3.size();k--)
-                    {
-                        if (DataAhead3.get(k).getTimestamp() >= tmp2) {
-                            t2 = k;
-                            break;
-                        }
-                    }
-                    for(int k = 0;k < DataAhead3.size();k--)
-                    {
-                        if (DataAhead3.get(k).getTimestamp() >= tmp3) {
-                            t3 = k;
-                            break;
-                        }
-                    }
-                    for(int k = 0;k < DataAhead3.size();k--)
-                    {
-                        if (DataAhead3.get(k).getTimestamp() >= tmp4) {
-                            t4 = k;
-                            break;
-                        }
-                    }
-
-                    for(int k = k1; k < t1;k++)
+                    for(int k = 0; k < DataAhead3.size();k++)
                     {
                         hundredMilliDataAheadX3.add(DataAhead3.get(k));
-                        Log.d("100msDataAhead",""+hundredMilliDataAheadX3.get(k).getTimestamp());
+                        Log.d("100msDataAhead..X..",""+hundredMilliDataAheadX3.get(hundredMilliDataAheadX3.indexOf(DataAhead3.get(k))).getTimestamp());
                     }
-                    for(int k = k2; k < t2;k++)
+                    for(int k = 0; k < DataAhead3.size();k++)
                     {
                         hundredMilliDataAheadY3.add(DataAhead3.get(k));
-                        Log.d("100msDataAhead",""+hundredMilliDataAheadY3.get(k).getTimestamp());
+                        Log.d("100msDataAhead..Y..",""+hundredMilliDataAheadY3.get(hundredMilliDataAheadX3.indexOf(DataAhead3.get(k))).getTimestamp());
                     }
-                    for(int k = k3; k < t3;k++)
+                    for(int k = 0; k < DataAhead3.size();k++)
                     {
                         hundredMilliDataAheadZ3.add(DataAhead3.get(k));
-                        Log.d("100msDataAhead",""+hundredMilliDataAheadZ3.get(k).getTimestamp());
+                        Log.d("100msDataAhead..Z..",""+hundredMilliDataAheadZ3.get(hundredMilliDataAheadX3.indexOf(DataAhead3.get(k))).getTimestamp());
                     }
-                    for(int k = k4; k < t4;k++)
+                    for(int k = 0; k < DataAhead3.size();k++)
                     {
                         hundredMilliDataAheadM3.add(DataAhead3.get(k));
-                        Log.d("100msDataAhead",""+hundredMilliDataAheadM3.get(k).getTimestamp());
+                        Log.d("100msDataAhead..M..",""+hundredMilliDataAheadM3.get(hundredMilliDataAheadX3.indexOf(DataAhead3.get(k))).getTimestamp());
                     }
 
                     long substractedTimeStamp = TappedCurrentTimeStamp_test - 100;
@@ -310,8 +347,17 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
                     //     diff_time();
                     duration();
                     max_to_avg();
+
+                    MagRead m=new MagRead();
+                    m.execute(Double.toString(meanX),Double.toString(meanY),Double.toString(meanZ),Double.toString(meanM),
+                            Double.toString(sdX),Double.toString(sdY),Double.toString(sdZ),Double.toString(sdM),
+                            Double.toString(diffX),Double.toString(diffY),Double.toString(diffZ),Double.toString(diffM),
+                            Double.toString(ncX),Double.toString(ncY),Double.toString(ncZ),Double.toString(ncM),
+                            Double.toString(mcX),Double.toString(mcY),Double.toString(mcZ),Double.toString(mcM),
+                            Double.toString(durX),Double.toString(durY),Double.toString(durZ),Double.toString(durM),
+                            Double.toString(max2avgX),Double.toString(max2avgY),Double.toString(max2avgZ),Double.toString(max2avgM));
                 }
-            }, 200);
+            }, 100);
         }
 
 
@@ -457,10 +503,10 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
         t_after_centerZ = hundredMilliDataAheadZ3.get(hundredMilliDataAheadZ3.size() / 2).getTimestamp();
         t_after_centerM = hundredMilliDataAheadM3.get(hundredMilliDataAheadM3.size() / 2).getTimestamp();
         t_before_center = hundredMilliDataBehind.get(hundredMilliDataBehind.size() / 2).getTimestamp();
-        durX = (t_after_centerX - t_before_center) / diffX;
-        durY = (t_after_centerY - t_before_center) / diffY;
-        durZ = (t_after_centerZ - t_before_center) / diffZ;
-        durM = (t_after_centerM - t_before_center) / diffM;
+        durX= ((double)(t_after_centerX-t_before_center)/(double)diffX);
+        durY= ((double)(t_after_centerY-t_before_center)/(double)diffY);
+        durZ= ((double)(t_after_centerZ-t_before_center)/(double)diffZ);
+        durM= ((double)(t_after_centerM-t_before_center)/(double)diffM);
         Log.d("Normalized time dur..X", "" + durX);
         Log.d("Normalized time dur..Y", "" + durY);
         Log.d("Normalized time dur..Z", "" + durZ);
@@ -468,13 +514,58 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
     }
 
     public void max_to_avg() {
-        max2avgX = (long) ((t_after_centerX - t_max_tapX) / (avg100msAfterX - maxX));
-        max2avgY = (long) ((t_after_centerY - t_max_tapY) / (avg100msAfterY - maxY));
-        max2avgZ = (long) ((t_after_centerZ - t_max_tapZ) / (avg100msAfterZ - maxZ));
-        max2avgM = (long) ((t_after_centerM - t_max_tapM) / (avg100msAfterM - maxM));
+        max2avgX= (double) ((t_after_centerX-t_max_tapX)/(avg100msAfterX-maxX));
+        max2avgY= (double) ((t_after_centerY-t_max_tapY)/(avg100msAfterY-maxY));
+        max2avgZ= (double) ((t_after_centerZ-t_max_tapZ)/(avg100msAfterZ-maxZ));
+        max2avgM= (double) ((t_after_centerM-t_max_tapM)/(avg100msAfterM-maxM));
         Log.d("Max_to_avg..X", "" + max2avgX);
         Log.d("Max_to_avg..Y", "" + max2avgY);
         Log.d("Max_to_avg..Z", "" + max2avgZ);
         Log.d("Max_to_avg..M", "" + max2avgM);
+    }
+
+    private class MagRead extends AsyncTask<String,String,String> {
+        @Override
+        protected String doInBackground(String... strings) {
+            WebServiceCaller wc=new WebServiceCaller();
+            wc.setSoapObject("Magnet");
+            wc.addProperty("f1x",strings[0]);
+            wc.addProperty("f1y",strings[1]);
+            wc.addProperty("f1z",strings[2]);
+            wc.addProperty("f1m",strings[3]);
+            wc.addProperty("f2x",strings[4]);
+            wc.addProperty("f2y",strings[5]);
+            wc.addProperty("f2z",strings[6]);
+            wc.addProperty("f2m",strings[7]);
+            wc.addProperty("f3x",strings[8]);
+            wc.addProperty("f3y",strings[9]);
+            wc.addProperty("f3z",strings[10]);
+            wc.addProperty("f3m",strings[11]);
+            wc.addProperty("f4x",strings[12]);
+            wc.addProperty("f4y",strings[13]);
+            wc.addProperty("f4z",strings[14]);
+            wc.addProperty("f4m",strings[15]);
+            wc.addProperty("f5x",strings[16]);
+            wc.addProperty("f5y",strings[17]);
+            wc.addProperty("f5z",strings[18]);
+            wc.addProperty("f5m",strings[19]);
+            wc.addProperty("f6x",strings[20]);
+            wc.addProperty("f6y",strings[21]);
+            wc.addProperty("f6z",strings[22]);
+            wc.addProperty("f6m",strings[23]);
+            wc.addProperty("f7x",strings[24]);
+            wc.addProperty("f7y",strings[25]);
+            wc.addProperty("f7z",strings[26]);
+            wc.addProperty("f7m",strings[27]);
+            wc.callWebService();
+
+            return wc.getResponse();
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Toast.makeText(TapEventMag.this, s, Toast.LENGTH_SHORT).show();
+        }
     }
 }

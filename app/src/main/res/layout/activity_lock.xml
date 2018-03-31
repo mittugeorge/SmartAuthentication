@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.hp.project2.LockActivity">
+
+    <EditText
+        android:id="@+id/pin"
+        android:layout_width="215dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="185dp"
+        android:ems="10"
+        android:hint="Enter PIN"
+        android:inputType="numberPassword"
+        tools:layout_editor_absoluteX="85dp"
+        tools:layout_editor_absoluteY="158dp" />
+
+    <Button
+        android:id="@+id/bt_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/pin"
+        android:layout_below="@+id/pin"
+        android:layout_marginStart="61dp"
+        android:layout_marginTop="47dp"
+        android:text="SUBMIT"
+        tools:layout_editor_absoluteX="148dp"
+        tools:layout_editor_absoluteY="263dp" />
+</RelativeLayout>
