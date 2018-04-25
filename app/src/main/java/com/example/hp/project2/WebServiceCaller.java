@@ -21,10 +21,9 @@ final public class WebServiceCaller {
     private String exception;
     private String soapAction;
 
-
     public void setSoapObject(String methodName) {
         request = new SoapObject("http://DB/", methodName);
-        url = "http://192.168.43.136:8084/WBphone1/WBExecute";
+        url = "http://192.168.43.4:8084/Wb_phone1/WBAdd";
     }
 
     public void addProperty(String key, Object value){

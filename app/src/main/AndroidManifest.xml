@@ -21,20 +21,24 @@
         <activity android:name=".Tap" />
         <activity android:name=".Main2Activity" />
         <activity android:name=".FlipCoin" />
-        <activity android:name=".TapEventNew"></activity>
-        <activity android:name=".GpsBasics"></activity>
-        <activity android:name=".LogHistory"></activity>
-        <activity android:name=".TapEventGyr"></activity>
-        <activity android:name=".TapEventMag"></activity>
-        <activity android:name=".LockActivity">
+        <activity android:name=".TapEventNew">
+
+        </activity>
+        <activity android:name=".Combined">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LockScreenActivity">
+        <activity android:name=".GpsBasics" />
+        <activity android:name=".LogHistory" />
+        <activity android:name=".TapEventGyr" />
+        <activity android:name=".TapEventMag" />
+        <activity android:name=".LockActivity">
 
         </activity>
+        <activity android:name=".LockScreenActivity"></activity>
+
         <receiver
             android:name=".Controller"
             android:description="@string/app_desc"
@@ -48,6 +52,8 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".HomeActivity"></activity>
     </application>
 
 </manifest>

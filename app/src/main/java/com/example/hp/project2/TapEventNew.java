@@ -29,7 +29,7 @@ import java.util.Locale;
  * Created by HP on 2/10/2018.
  */
 
-public class TapEventNew extends AppCompatActivity implements View.OnClickListener, SensorEventListener, View.OnTouchListener {
+public class TapEventNew extends AppCompatActivity implements SensorEventListener, View.OnTouchListener {
 
     private SensorManager mSensorManager;
     private Sensor acc, gyr, mag;
@@ -59,8 +59,7 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
     ArrayList<SensorData> DataAhead1;
     ArrayList<SensorData> limitSensorData;
     ArrayList<ArrayList<SensorData>> all_clicked_sensorData;
-    Button bt_one, bt_two, bt_three, bt_four, bt_five, bt_six, bt_seven, bt_eight, bt_nine, bt_zero, bt_submit;
-    TextView tv_enter;//, tv_captcha;
+    Button bt_one, bt_two, bt_three, bt_four, bt_five, bt_six, bt_seven, bt_eight, bt_nine, bt_zero, bt_submit,bt_cancel;
     private long TappedCurrentTimeStamp_test;
     ArrayList<SensorData> tapDataX1;
     ArrayList<SensorData> tapDataY1;
@@ -83,7 +82,14 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
         bt_nine = (Button) findViewById(R.id.bt_nine);
         bt_zero = (Button) findViewById(R.id.bt_zero);
         bt_submit = (Button) findViewById(R.id.bt_submit);
-        tv_enter = (TextView) findViewById(R.id.tv_enter);
+        bt_cancel = (Button) findViewById(R.id.bt_cancel);
+        bt_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(TapEventNew.this, "user", Toast.LENGTH_SHORT).show();
+            }
+        });
+        //bt_cancel.setOnTouchListener(this);
         bt_one.setOnTouchListener(this);
         bt_two.setOnTouchListener(this);
         bt_three.setOnTouchListener(this);
@@ -117,7 +123,7 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
 
     public void sensorStarting()
     {
-        Log.d("Basil_new", "calling starting functions");
+        Log.d("Bas_new", "calling starting functions");
         started = true;
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         acc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -190,11 +196,11 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
 
     }
 
-    @Override
-    public void onClick(View view)
-    {
-
-    }
+//    @Override
+//    public void onClick(View view)
+//    {
+//
+//    }
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent)
@@ -371,7 +377,6 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                     avg_calculation();
                     net_change();
                     max_change();
-               //     diff_time();
                     duration();
                     max_to_avg();
 
@@ -605,6 +610,5 @@ public class TapEventNew extends AppCompatActivity implements View.OnClickListen
                 startActivity(i);
             }
         }
-
     }
 }

@@ -50,8 +50,7 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
     ArrayList<SensorData> DataAhead3;
     ArrayList<SensorData> limitSensorData;
     ArrayList<ArrayList<SensorData>> all_clicked_sensorData;
-    Button bt_one, bt_two, bt_three, bt_four, bt_five, bt_six, bt_seven, bt_eight, bt_nine, bt_zero, bt_submit;
-    TextView tv_enter;//, tv_captcha;
+    Button bt_one, bt_two, bt_three, bt_four, bt_five, bt_six, bt_seven, bt_eight, bt_nine, bt_zero, bt_submit,bt_cancel;
     private long TappedCurrentTimeStamp_test;
     ArrayList<SensorData> tapDataX3;
     ArrayList<SensorData> tapDataY3;
@@ -74,7 +73,8 @@ public class TapEventMag extends AppCompatActivity implements View.OnClickListen
         bt_nine = (Button) findViewById(R.id.bt_nine);
         bt_zero = (Button) findViewById(R.id.bt_zero);
         bt_submit = (Button) findViewById(R.id.bt_submit);
-        tv_enter = (TextView) findViewById(R.id.tv_enter);
+        bt_cancel = (Button) findViewById(R.id.bt_cancel);
+        bt_cancel.setOnTouchListener(this);
         bt_one.setOnTouchListener(this);
         bt_two.setOnTouchListener(this);
         bt_three.setOnTouchListener(this);
