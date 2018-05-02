@@ -1,10 +1,9 @@
-//under development
-
 package com.example.hp.project2;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -27,12 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Created by HP on 3/2/2018.
- */
-
-
-public class Combined extends AppCompatActivity implements View.OnClickListener, SensorEventListener, View.OnTouchListener {
+public class ExecutionActivity extends AppCompatActivity implements View.OnClickListener, SensorEventListener, View.OnTouchListener {
     private int count=0;
     private SensorManager mSensorManager;
     private Sensor acc, gyr, mag;
@@ -50,7 +44,7 @@ public class Combined extends AppCompatActivity implements View.OnClickListener,
     private long avg100msAfter1, diff1;
     private long avg100msAfter2, diff2;
     private long avg100msAfter3, diff3;
-    long currentTime, t_after_center;
+    long currentTime;
     long t_max_tapX1, t_max_tapY1, t_max_tapZ1, t_max_tapM1;
     long t_max_tapX2, t_max_tapY2, t_max_tapZ2, t_max_tapM2;
     long t_max_tapX3, t_max_tapY3, t_max_tapZ3, t_max_tapM3;
@@ -66,43 +60,48 @@ public class Combined extends AppCompatActivity implements View.OnClickListener,
     private double max2avgX2, max2avgY2, max2avgZ2, max2avgM2;
     private double max2avgX3, max2avgY3, max2avgZ3, max2avgM3;
     ArrayList<SensorData> accData;
-    ArrayList<SensorData> tapDataX1;
-    ArrayList<SensorData> tapDataX2;
-    ArrayList<SensorData> tapDataX3;
-    ArrayList<SensorData> tapDataY1;
-    ArrayList<SensorData> tapDataY2;
-    ArrayList<SensorData> tapDataY3;
-    ArrayList<SensorData> tapDataZ1;
-    ArrayList<SensorData> tapDataZ2;
-    ArrayList<SensorData> tapDataZ3;
-    ArrayList<SensorData> tapDataM1;
-    ArrayList<SensorData> tapDataM2;
-    ArrayList<SensorData> tapDataM3;
-    List<SensorData> hundredMilliDataBehind1;
-    List<SensorData> hundredMilliDataBehind2;
-    List<SensorData> hundredMilliDataBehind3;
-    ArrayList<SensorData> DataAhead1;
-    ArrayList<SensorData> DataAhead2;
-    ArrayList<SensorData> DataAhead3;
-    ArrayList<SensorData> gyrData;
-    ArrayList<SensorData> magData;
-    ArrayList<String> timeStamp1;
-    ArrayList<String> timeStamp2;
-    ArrayList<String> timeStamp3;
-    ArrayList<Long> accTimeStamp;
-    ArrayList<Long> gyrTimeStamp;
-    ArrayList<Long> magTimeStamp;
+    ArrayList<SensorData> tapDataX1; ArrayList<SensorData> tapDataX2; ArrayList<SensorData> tapDataX3;
+    ArrayList<SensorData> tapDataY1; ArrayList<SensorData> tapDataY2; ArrayList<SensorData> tapDataY3;
+    ArrayList<SensorData> tapDataZ1; ArrayList<SensorData> tapDataZ2; ArrayList<SensorData> tapDataZ3;
+    ArrayList<SensorData> tapDataM1; ArrayList<SensorData> tapDataM2; ArrayList<SensorData> tapDataM3;
+    List<SensorData> hundredMilliDataBehind1; List<SensorData> hundredMilliDataBehind2; List<SensorData> hundredMilliDataBehind3;
+    ArrayList<SensorData> DataAhead1; ArrayList<SensorData> DataAhead2; ArrayList<SensorData> DataAhead3;
+    ArrayList<SensorData> gyrData; ArrayList<SensorData> magData;
+    ArrayList<String> timeStamp1; ArrayList<String> timeStamp2; ArrayList<String> timeStamp3;
+    ArrayList<Long> accTimeStamp; ArrayList<Long> gyrTimeStamp; ArrayList<Long> magTimeStamp;
     ArrayList<SensorData> limitSensorData;
     ArrayList<ArrayList<SensorData>> all_clicked_sensorData;
     Button bt_one, bt_two, bt_three, bt_four, bt_five, bt_six, bt_seven, bt_eight, bt_nine, bt_zero, bt_submit,bt_cancel;
     private long TappedCurrentTimeStamp_test;
     DevicePolicyManager deviceManger;
+    private DBIntruder db;
+//    DBAcc db1;
+//    DBGyr db2;
+//    DBMag db3;
+    LearningActivity ln=new LearningActivity();
+    Cursor r1 = ln.db1.getMaxData();
+    Cursor r2 = ln.db1.getMinData();
+    Cursor r3 = ln.db2.getMaxData();
+    Cursor r4 = ln.db2.getMinData();
+    Cursor r5 = ln.db3.getMaxData();
+    Cursor r6 = ln.db3.getMinData();
+    Double t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,
+            t17,t18,t19,t20,t21,t22,t23,t24,t25,t26,t27,t28,t29,t30,t31,t32,
+            t33,t34,t35,t36,t37,t38,t39,t40,t41,t42,t43,t44,t45,t46,t47,t48;
+    Double s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12,s13,s14,s15,s16,
+            s17,s18,s19,s20,s21,s22,s23,s24,s25,s26,s27,s28,s29,s30,s31,s32,
+            s33,s34,s35,s36,s37,s38,s39,s40,s41,s42,s43,s44,s45,s46,s47,s48;
+    private int counter=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_tap);
+        setContentView(R.layout.activity_execution);
+        db = new DBIntruder(this);
+        ln.db1 = new DBAcc(this);
+        ln.db2 = new DBGyr(this);
+        ln.db3 = new DBMag(this);
         deviceManger = (DevicePolicyManager)getSystemService(Context.DEVICE_POLICY_SERVICE);
         bt_one = (Button) findViewById(R.id.bt_one);
         bt_two = (Button) findViewById(R.id.bt_two);
@@ -116,12 +115,6 @@ public class Combined extends AppCompatActivity implements View.OnClickListener,
         bt_zero = (Button) findViewById(R.id.bt_zero);
         bt_submit = (Button) findViewById(R.id.bt_submit);
         bt_cancel = (Button) findViewById(R.id.bt_cancel);
-//        bt_cancel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Toast.makeText(Combined.this, "user", Toast.LENGTH_SHORT).show();
-//            }
-//        });
         bt_cancel.setOnTouchListener(this);
         bt_one.setOnTouchListener(this);
         bt_two.setOnTouchListener(this);
@@ -571,22 +564,23 @@ public class Combined extends AppCompatActivity implements View.OnClickListener,
                     duration();
                     max_to_avg();
 
-                    AccRead a=new AccRead();
-                    a.execute(Double.toString(meanX1),Double.toString(meanY1),Double.toString(meanZ1),Double.toString(meanM1),
+                    db.insertData("1",Double.toString(meanX1),Double.toString(meanY1),Double.toString(meanZ1),Double.toString(meanM1),
                             Double.toString(sdX1),Double.toString(sdY1),Double.toString(sdZ1),Double.toString(sdM1),
                             Double.toString(diff1),Double.toString(diff1),Double.toString(diff1),Double.toString(diff1),
                             Double.toString(ncX1),Double.toString(ncY1),Double.toString(ncZ1),Double.toString(ncM1),
                             Double.toString(mcX1),Double.toString(mcY1),Double.toString(mcZ1),Double.toString(mcM1),
                             Double.toString(dur1),Double.toString(dur1),Double.toString(dur1),Double.toString(dur1),
-                            Double.toString(max2avgX1),Double.toString(max2avgY1),Double.toString(max2avgZ1),Double.toString(max2avgM1),
-                            Double.toString(meanX2),Double.toString(meanY2),Double.toString(meanZ2),Double.toString(meanM2),
+                            Double.toString(max2avgX1),Double.toString(max2avgY1),Double.toString(max2avgZ1),Double.toString(max2avgM1));
+
+                    db.insertData("2",Double.toString(meanX2),Double.toString(meanY2),Double.toString(meanZ2),Double.toString(meanM2),
                             Double.toString(sdX2),Double.toString(sdY2),Double.toString(sdZ2),Double.toString(sdM2),
                             Double.toString(diff2),Double.toString(diff2),Double.toString(diff2),Double.toString(diff2),
                             Double.toString(ncX2),Double.toString(ncY2),Double.toString(ncZ2),Double.toString(ncM2),
                             Double.toString(mcX2),Double.toString(mcY2),Double.toString(mcZ2),Double.toString(mcM2),
                             Double.toString(dur2),Double.toString(dur2),Double.toString(dur2),Double.toString(dur2),
-                            Double.toString(max2avgX2),Double.toString(max2avgY2),Double.toString(max2avgZ2),Double.toString(max2avgM2),
-                            Double.toString(meanX3),Double.toString(meanY3),Double.toString(meanZ3),Double.toString(meanM3),
+                            Double.toString(max2avgX2),Double.toString(max2avgY2),Double.toString(max2avgZ2),Double.toString(max2avgM2));
+
+                    db.insertData("3",Double.toString(meanX3),Double.toString(meanY3),Double.toString(meanZ3),Double.toString(meanM3),
                             Double.toString(sdX3),Double.toString(sdY3),Double.toString(sdZ3),Double.toString(sdM3),
                             Double.toString(diff3),Double.toString(diff3),Double.toString(diff3),Double.toString(diff3),
                             Double.toString(ncX3),Double.toString(ncY3),Double.toString(ncZ3),Double.toString(ncM3),
@@ -594,6 +588,9 @@ public class Combined extends AppCompatActivity implements View.OnClickListener,
                             Double.toString(dur3),Double.toString(dur3),Double.toString(dur3),Double.toString(dur3),
                             Double.toString(max2avgX3),Double.toString(max2avgY3),Double.toString(max2avgZ3),Double.toString(max2avgM3));
 
+                    calcThreshold();
+                    calcNewThreshold();
+                    compareThreshold();
                 }
             },300);
         }
@@ -628,6 +625,147 @@ public class Combined extends AppCompatActivity implements View.OnClickListener,
 //        }
 
         return true;
+    }
+
+    private void compareThreshold() {
+        if(s1<-t1 || s1>t1) counter++;
+        if(s2<-t2 || s2>t2) counter++;
+        if(s3<-t3 || s3>t3) counter++;
+        if(s4<-t4 || s4>t4) counter++;
+        if(s5<-t5 || s5>t5) counter++;
+        if(s6<-t6 || s6>t6) counter++;
+        if(s7<-t7 || s7>t7) counter++;
+        if(s8<-t8 || s8>t8) counter++;
+        if(s9<-t9 || s9>t9) counter++;
+        if(s10<-t10 || s10>t10) counter++;
+        if(s11<-t11 || s11>t11) counter++;
+        if(s12<-t12 || s12>t12) counter++;
+        if(s13<-t13 || s13>t13) counter++;
+        if(s14<-t14 || s14>t14) counter++;
+        if(s15<-t15 || s15>t15) counter++;
+        if(s16<-t16 || s16>t16) counter++;
+        if(s17<-t17 || s17>t17) counter++;
+        if(s18<-t18 || s18>t18) counter++;
+        if(s19<-t19 || s19>t19) counter++;
+        if(s20<-t20 || s20>t20) counter++;
+        if(s21<-t21 && s21>t21) counter++;
+        if(s22<-t22 && s22>t22) counter++;
+        if(s23<-t23 && s23>t23) counter++;
+        if(s24<-t24 && s24>t24) counter++;
+        if(s25<-t25 && s25>t25) counter++;
+        if(s26<-t26 && s26>t26) counter++;
+        if(s27<-t27 && s27>t27) counter++;
+        if(s28<-t28 && s28>t28) counter++;
+        if(s29<-t29 || s29>t29) counter++;
+        if(s30<-t30 || s30>t30) counter++;
+        if(s31<-t31 || s31>t31) counter++;
+        if(s32<-t32 || s32>t32) counter++;
+        if(s33<-t33 || s33>t33) counter++;
+        if(s34<-t34 || s34>t34) counter++;
+        if(s35<-t35 || s35>t35) counter++;
+        if(s36<-t36 || s36>t36) counter++;
+        if(s37<-t37 || s37>t37) counter++;
+        if(s38<-t38 || s38>t38) counter++;
+        if(s39<-t39 || s39>t39) counter++;
+        if(s40<-t40 && s40>t40) counter++;
+        if(s41<-t41 && s41>t41) counter++;
+        if(s42<-t42 && s42>t42) counter++;
+        if(s43<-t43 && s43>t43) counter++;
+        if(s44<-t44 && s44>t44) counter++;
+        if(s45<-t45 && s45>t45) counter++;
+        if(s46<-t46 && s46>t46) counter++;
+        if(s47<-t47 && s47>t47) counter++;
+        if(s48<-t48 && s48>t48) counter++;
+
+        if(counter>=24){
+            count++;
+            Toast.makeText(ExecutionActivity.this, "Intruder Detected", Toast.LENGTH_SHORT).show();
+            if(count>=3) {
+                count=0;
+                deviceManger.lockNow();
+            }
+        }
+        else{
+            Toast.makeText(ExecutionActivity.this, "User", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void calcNewThreshold() {
+        s1=r1.getDouble(r1.getColumnIndex(DBAcc.f1x))-meanX1; s2=r1.getDouble(r1.getColumnIndex(DBAcc.f1y))-meanY1;
+        s3=r1.getDouble(r1.getColumnIndex(DBAcc.f1z))-meanZ1; s4=r1.getDouble(r1.getColumnIndex(DBAcc.f1m))-meanM1;
+        s5=r1.getDouble(r1.getColumnIndex(DBAcc.f2x))-sdX1; s6=r1.getDouble(r1.getColumnIndex(DBAcc.f2y))-sdY1;
+        s7=r1.getDouble(r1.getColumnIndex(DBAcc.f2z))-sdZ1; s8=r1.getDouble(r1.getColumnIndex(DBAcc.f2m))-sdM1;
+        s9=r1.getDouble(r1.getColumnIndex(DBAcc.f4x))-ncX1; s10=r1.getDouble(r1.getColumnIndex(DBAcc.f4y))-ncY1;
+        s11=r1.getDouble(r1.getColumnIndex(DBAcc.f4z))-ncZ1; s12=r1.getDouble(r1.getColumnIndex(DBAcc.f4m))-ncM1;
+        s13=r1.getDouble(r1.getColumnIndex(DBAcc.f5x))-mcX1; s14=r1.getDouble(r1.getColumnIndex(DBAcc.f5y))-mcY1;
+        s15=r1.getDouble(r1.getColumnIndex(DBAcc.f5z))-mcZ1; s16=r1.getDouble(r1.getColumnIndex(DBAcc.f5m))-mcM1;
+        s17=r3.getDouble(r3.getColumnIndex(DBAcc.f1x))-meanX2; s18=r3.getDouble(r3.getColumnIndex(DBAcc.f1y))-meanY2;
+        s19=r3.getDouble(r3.getColumnIndex(DBAcc.f1z))-meanZ2; s20=r3.getDouble(r3.getColumnIndex(DBAcc.f1m))-meanM2;
+        s21=r3.getDouble(r3.getColumnIndex(DBAcc.f2x))-sdX2; s22=r3.getDouble(r3.getColumnIndex(DBAcc.f2y))-sdY2;
+        s23=r3.getDouble(r3.getColumnIndex(DBAcc.f2z))-sdZ2; s24=r3.getDouble(r3.getColumnIndex(DBAcc.f2m))-sdM2;
+        s25=r3.getDouble(r3.getColumnIndex(DBAcc.f4x))-ncX2; s26=r3.getDouble(r3.getColumnIndex(DBAcc.f4y))-ncY2;
+        s27=r3.getDouble(r3.getColumnIndex(DBAcc.f4z))-ncZ2; s28=r3.getDouble(r3.getColumnIndex(DBAcc.f4m))-ncM2;
+        s29=r3.getDouble(r3.getColumnIndex(DBAcc.f5x))-mcX2; s30=r3.getDouble(r3.getColumnIndex(DBAcc.f5y))-mcY2;
+        s31=r3.getDouble(r3.getColumnIndex(DBAcc.f5z))-mcZ2; s32=r3.getDouble(r3.getColumnIndex(DBAcc.f5m))-mcM2;
+        s33=r5.getDouble(r5.getColumnIndex(DBAcc.f1x))-meanX3; s34=r5.getDouble(r5.getColumnIndex(DBAcc.f1y))-meanY3;
+        s35=r5.getDouble(r5.getColumnIndex(DBAcc.f1z))-meanZ3; s36=r5.getDouble(r5.getColumnIndex(DBAcc.f1m))-meanM3;
+        s37=r5.getDouble(r5.getColumnIndex(DBAcc.f2x))-sdX3; s38=r5.getDouble(r5.getColumnIndex(DBAcc.f2y))-sdY3;
+        s39=r5.getDouble(r5.getColumnIndex(DBAcc.f2z))-sdZ3; s40=r5.getDouble(r5.getColumnIndex(DBAcc.f2m))-sdM3;
+        s41=r5.getDouble(r5.getColumnIndex(DBAcc.f4x))-ncX3; s42=r5.getDouble(r5.getColumnIndex(DBAcc.f4y))-ncY3;
+        s43=r5.getDouble(r5.getColumnIndex(DBAcc.f4z))-ncZ3; s44=r5.getDouble(r5.getColumnIndex(DBAcc.f4m))-ncM3;
+        s45=r5.getDouble(r5.getColumnIndex(DBAcc.f5x))-mcX3; s46=r5.getDouble(r5.getColumnIndex(DBAcc.f5y))-mcY3;
+        s47=r5.getDouble(r5.getColumnIndex(DBAcc.f5z))-mcZ3; s48=r5.getDouble(r5.getColumnIndex(DBAcc.f5m))-mcM3;
+    }
+
+    private void calcThreshold() {
+        t1=r1.getDouble(r1.getColumnIndex(DBAcc.f1x))-r2.getDouble(r2.getColumnIndex(DBAcc.f1x));
+        t2=r1.getDouble(r1.getColumnIndex(DBAcc.f1y))-r2.getDouble(r2.getColumnIndex(DBAcc.f1y));
+        t3=r1.getDouble(r1.getColumnIndex(DBAcc.f1z))-r2.getDouble(r2.getColumnIndex(DBAcc.f1z));
+        t4=r1.getDouble(r1.getColumnIndex(DBAcc.f1m))-r2.getDouble(r2.getColumnIndex(DBAcc.f1m));
+        t5=r1.getDouble(r1.getColumnIndex(DBAcc.f2x))-r2.getDouble(r2.getColumnIndex(DBAcc.f2x));
+        t6=r1.getDouble(r1.getColumnIndex(DBAcc.f2y))-r2.getDouble(r2.getColumnIndex(DBAcc.f2y));
+        t7=r1.getDouble(r1.getColumnIndex(DBAcc.f2z))-r2.getDouble(r2.getColumnIndex(DBAcc.f2z));
+        t8=r1.getDouble(r1.getColumnIndex(DBAcc.f2m))-r2.getDouble(r2.getColumnIndex(DBAcc.f2m));
+        t9=r1.getDouble(r1.getColumnIndex(DBAcc.f4x))-r2.getDouble(r2.getColumnIndex(DBAcc.f4x));
+        t10=r1.getDouble(r1.getColumnIndex(DBAcc.f4y))-r2.getDouble(r2.getColumnIndex(DBAcc.f4y));
+        t11=r1.getDouble(r1.getColumnIndex(DBAcc.f4z))-r2.getDouble(r2.getColumnIndex(DBAcc.f4z));
+        t12=r1.getDouble(r1.getColumnIndex(DBAcc.f4m))-r2.getDouble(r2.getColumnIndex(DBAcc.f4m));
+        t13=r1.getDouble(r1.getColumnIndex(DBAcc.f5x))-r2.getDouble(r2.getColumnIndex(DBAcc.f5x));
+        t14=r1.getDouble(r1.getColumnIndex(DBAcc.f5y))-r2.getDouble(r2.getColumnIndex(DBAcc.f5y));
+        t15=r1.getDouble(r1.getColumnIndex(DBAcc.f5z))-r2.getDouble(r2.getColumnIndex(DBAcc.f5z));
+        t16=r1.getDouble(r1.getColumnIndex(DBAcc.f5m))-r2.getDouble(r2.getColumnIndex(DBAcc.f5m));
+        t17=r3.getDouble(r3.getColumnIndex(DBAcc.f1x))-r4.getDouble(r4.getColumnIndex(DBAcc.f1x));
+        t18=r3.getDouble(r3.getColumnIndex(DBAcc.f1y))-r4.getDouble(r4.getColumnIndex(DBAcc.f1y));
+        t19=r3.getDouble(r3.getColumnIndex(DBAcc.f1z))-r4.getDouble(r4.getColumnIndex(DBAcc.f1z));
+        t20=r3.getDouble(r3.getColumnIndex(DBAcc.f1m))-r4.getDouble(r4.getColumnIndex(DBAcc.f1m));
+        t21=r3.getDouble(r3.getColumnIndex(DBAcc.f2x))-r4.getDouble(r4.getColumnIndex(DBAcc.f2x));
+        t22=r3.getDouble(r3.getColumnIndex(DBAcc.f2y))-r4.getDouble(r4.getColumnIndex(DBAcc.f2y));
+        t23=r3.getDouble(r3.getColumnIndex(DBAcc.f2z))-r4.getDouble(r4.getColumnIndex(DBAcc.f2z));
+        t24=r3.getDouble(r3.getColumnIndex(DBAcc.f2m))-r4.getDouble(r4.getColumnIndex(DBAcc.f2m));
+        t25=r3.getDouble(r3.getColumnIndex(DBAcc.f4x))-r4.getDouble(r4.getColumnIndex(DBAcc.f4x));
+        t26=r3.getDouble(r3.getColumnIndex(DBAcc.f4y))-r4.getDouble(r4.getColumnIndex(DBAcc.f4y));
+        t27=r3.getDouble(r3.getColumnIndex(DBAcc.f4z))-r4.getDouble(r4.getColumnIndex(DBAcc.f4z));
+        t28=r3.getDouble(r3.getColumnIndex(DBAcc.f4m))-r4.getDouble(r4.getColumnIndex(DBAcc.f4m));
+        t29=r3.getDouble(r3.getColumnIndex(DBAcc.f5x))-r4.getDouble(r4.getColumnIndex(DBAcc.f5x));
+        t30=r3.getDouble(r3.getColumnIndex(DBAcc.f5y))-r4.getDouble(r4.getColumnIndex(DBAcc.f5y));
+        t31=r3.getDouble(r3.getColumnIndex(DBAcc.f5z))-r4.getDouble(r4.getColumnIndex(DBAcc.f5z));
+        t32=r3.getDouble(r3.getColumnIndex(DBAcc.f5m))-r4.getDouble(r4.getColumnIndex(DBAcc.f5m));
+        t33=r5.getDouble(r5.getColumnIndex(DBAcc.f1x))-r6.getDouble(r6.getColumnIndex(DBAcc.f1x));
+        t34=r5.getDouble(r5.getColumnIndex(DBAcc.f1y))-r6.getDouble(r6.getColumnIndex(DBAcc.f1y));
+        t35=r5.getDouble(r5.getColumnIndex(DBAcc.f1z))-r6.getDouble(r6.getColumnIndex(DBAcc.f1z));
+        t36=r5.getDouble(r5.getColumnIndex(DBAcc.f1m))-r6.getDouble(r6.getColumnIndex(DBAcc.f1m));
+        t37=r5.getDouble(r5.getColumnIndex(DBAcc.f2x))-r6.getDouble(r6.getColumnIndex(DBAcc.f2x));
+        t38=r5.getDouble(r5.getColumnIndex(DBAcc.f2y))-r6.getDouble(r6.getColumnIndex(DBAcc.f2y));
+        t39=r5.getDouble(r5.getColumnIndex(DBAcc.f2z))-r6.getDouble(r6.getColumnIndex(DBAcc.f2z));
+        t40=r5.getDouble(r5.getColumnIndex(DBAcc.f2m))-r6.getDouble(r6.getColumnIndex(DBAcc.f2m));
+        t41=r5.getDouble(r5.getColumnIndex(DBAcc.f4x))-r6.getDouble(r6.getColumnIndex(DBAcc.f4x));
+        t42=r5.getDouble(r5.getColumnIndex(DBAcc.f4y))-r6.getDouble(r6.getColumnIndex(DBAcc.f4y));
+        t43=r5.getDouble(r5.getColumnIndex(DBAcc.f4z))-r6.getDouble(r6.getColumnIndex(DBAcc.f4z));
+        t44=r5.getDouble(r5.getColumnIndex(DBAcc.f4m))-r6.getDouble(r6.getColumnIndex(DBAcc.f4m));
+        t45=r5.getDouble(r5.getColumnIndex(DBAcc.f5x))-r6.getDouble(r6.getColumnIndex(DBAcc.f5x));
+        t46=r5.getDouble(r5.getColumnIndex(DBAcc.f5y))-r6.getDouble(r6.getColumnIndex(DBAcc.f5y));
+        t47=r5.getDouble(r5.getColumnIndex(DBAcc.f5z))-r6.getDouble(r6.getColumnIndex(DBAcc.f5z));
+        t48=r5.getDouble(r5.getColumnIndex(DBAcc.f5m))-r6.getDouble(r6.getColumnIndex(DBAcc.f5m));
     }
 
     public void mean_calculation()
@@ -877,119 +1015,6 @@ public class Combined extends AppCompatActivity implements View.OnClickListener,
         max2avgY3= (double) ((t_after_center3-t_max_tapY3)/(avg100msAfter3-maxY3));
         max2avgZ3= (double) ((t_after_center3-t_max_tapZ3)/(avg100msAfter3-maxZ3));
         max2avgM3= (double) ((t_after_center3-t_max_tapM3)/(avg100msAfter3-maxM3));
-    }
-
-    private class AccRead extends AsyncTask<String,String,String> {
-        @Override
-        protected String doInBackground(String... strings) {
-            WebServiceCaller wc=new WebServiceCaller();
-            wc.setSoapObject("Detect");
-            wc.addProperty("f1x1",strings[0]);
-            wc.addProperty("f1y1",strings[1]);
-            wc.addProperty("f1z1",strings[2]);
-            wc.addProperty("f1m1",strings[3]);
-            wc.addProperty("f2x1",strings[4]);
-            wc.addProperty("f2y1",strings[5]);
-            wc.addProperty("f2z1",strings[6]);
-            wc.addProperty("f2m1",strings[7]);
-            wc.addProperty("f3x1",strings[8]);
-            wc.addProperty("f3y1",strings[9]);
-            wc.addProperty("f3z1",strings[10]);
-            wc.addProperty("f3m1",strings[11]);
-            wc.addProperty("f4x1",strings[12]);
-            wc.addProperty("f4y1",strings[13]);
-            wc.addProperty("f4z1",strings[14]);
-            wc.addProperty("f4m1",strings[15]);
-            wc.addProperty("f5x1",strings[16]);
-            wc.addProperty("f5y1",strings[17]);
-            wc.addProperty("f5z1",strings[18]);
-            wc.addProperty("f5m1",strings[19]);
-            wc.addProperty("f6x1",strings[20]);
-            wc.addProperty("f6y1",strings[21]);
-            wc.addProperty("f6z1",strings[22]);
-            wc.addProperty("f6m1",strings[23]);
-            wc.addProperty("f7x1",strings[24]);
-            wc.addProperty("f7y1",strings[25]);
-            wc.addProperty("f7z1",strings[26]);
-            wc.addProperty("f7m1",strings[27]);
-            wc.addProperty("f1x2",strings[28]);
-            wc.addProperty("f1y2",strings[29]);
-            wc.addProperty("f1z2",strings[30]);
-            wc.addProperty("f1m2",strings[31]);
-            wc.addProperty("f2x2",strings[32]);
-            wc.addProperty("f2y2",strings[33]);
-            wc.addProperty("f2z2",strings[34]);
-            wc.addProperty("f2m2",strings[35]);
-            wc.addProperty("f3x2",strings[36]);
-            wc.addProperty("f3y2",strings[37]);
-            wc.addProperty("f3z2",strings[38]);
-            wc.addProperty("f3m2",strings[39]);
-            wc.addProperty("f4x2",strings[40]);
-            wc.addProperty("f4y2",strings[41]);
-            wc.addProperty("f4z2",strings[42]);
-            wc.addProperty("f4m2",strings[43]);
-            wc.addProperty("f5x2",strings[44]);
-            wc.addProperty("f5y2",strings[45]);
-            wc.addProperty("f5z2",strings[46]);
-            wc.addProperty("f5m2",strings[47]);
-            wc.addProperty("f6x2",strings[48]);
-            wc.addProperty("f6y2",strings[49]);
-            wc.addProperty("f6z2",strings[50]);
-            wc.addProperty("f6m2",strings[51]);
-            wc.addProperty("f7x2",strings[52]);
-            wc.addProperty("f7y2",strings[53]);
-            wc.addProperty("f7z2",strings[54]);
-            wc.addProperty("f7m2",strings[55]);
-            wc.addProperty("f1x3",strings[56]);
-            wc.addProperty("f1y3",strings[57]);
-            wc.addProperty("f1z3",strings[58]);
-            wc.addProperty("f1m3",strings[59]);
-            wc.addProperty("f2x3",strings[60]);
-            wc.addProperty("f2y3",strings[61]);
-            wc.addProperty("f2z3",strings[62]);
-            wc.addProperty("f2m3",strings[63]);
-            wc.addProperty("f3x3",strings[64]);
-            wc.addProperty("f3y3",strings[65]);
-            wc.addProperty("f3z3",strings[66]);
-            wc.addProperty("f3m3",strings[67]);
-            wc.addProperty("f4x3",strings[68]);
-            wc.addProperty("f4y3",strings[69]);
-            wc.addProperty("f4z3",strings[70]);
-            wc.addProperty("f4m3",strings[71]);
-            wc.addProperty("f5x3",strings[72]);
-            wc.addProperty("f5y3",strings[73]);
-            wc.addProperty("f5z3",strings[74]);
-            wc.addProperty("f5m3",strings[75]);
-            wc.addProperty("f6x3",strings[76]);
-            wc.addProperty("f6y3",strings[77]);
-            wc.addProperty("f6z3",strings[78]);
-            wc.addProperty("f6m3",strings[79]);
-            wc.addProperty("f7x3",strings[80]);
-            wc.addProperty("f7y3",strings[81]);
-            wc.addProperty("f7z3",strings[82]);
-            wc.addProperty("f7m3",strings[83]);
-            wc.callWebService();
-
-            return wc.getResponse();
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            if (s.equals("intruder")){
-                count++;
-                Toast.makeText(Combined.this, s, Toast.LENGTH_SHORT).show();
-                if(count>=3) {
-                    Toast.makeText(Combined.this, "intruder", Toast.LENGTH_SHORT).show();
-                    deviceManger.lockNow();
-                }
-//                Intent i = new Intent(Combined.this, LockActivity.class);
-//                startActivity(i);
-            }
-            else if(s.equals("user")){
-                Toast.makeText(Combined.this, s, Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 }
 

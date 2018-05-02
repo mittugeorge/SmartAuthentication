@@ -1,6 +1,7 @@
 package com.example.hp.project2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -486,16 +487,6 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
         Log.d("Maximum Change in M", "" + mcM);
     }
 
-   /* public void diff_time(){
-        long t_min;
-        for(int i=0;i<hundredMilliDataAhead.size();i++){
-            for (j=0;j<hundredMilliDataAhead.size();j++){
-                mod=
-            }
-            avgDiffs(i)=mod/(hundredMilliDataAhead.size()-i+1);
-        }
-    }*/
-
     public void duration() {
         long t_before_center;
         t_after_centerX = hundredMilliDataAheadX2.get(hundredMilliDataAheadX2.size() / 2).getTimestamp();
@@ -566,6 +557,10 @@ public class TapEventGyr extends AppCompatActivity implements View.OnClickListen
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             Toast.makeText(TapEventGyr.this, s, Toast.LENGTH_SHORT).show();
+            if (s.equals("intruder")){
+                Intent i = new Intent(TapEventGyr.this, LockActivity.class);
+                startActivity(i);
+            }
         }
     }
 }
